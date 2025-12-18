@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SubSync</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="background-blur"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-layer-group"></i>
+                <h1>SubSync</h1>
+            </div>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <span id="user-display" style="color:#94a3b8;">Loading...</span>
+                <button onclick="logout()" style="width:auto; padding:8px 15px; background:rgba(255,255,255,0.1);">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <section class="add-sub-section">
+                <h3><i class="fa-solid fa-plus-circle"></i> New Subscription</h3>
+                <form id="sub-form">
+
+                    <div class="input-group">
+                        <label>Select Service</label>
+                        <select id="serviceSelect" required
+                            style="width:100%; padding:12px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:white;">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Monthly Cost</label>
+                        <input type="number" id="amount" step="0.01" required>
+                    </div>
+
+                    <button type="submit">Track Subscription</button>
+                </form>
+            </section>
+
+            <section class="list-section">
+                <h3>Active Subscriptions</h3>
+                <div id="sub-list" class="grid-container">
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 1. Check Login
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        if (!user) window.location.href = 'login.html';
+        document.getElementById('user-display').innerText = user.username;
+
+        // 2. Init
+        async function init() {
+            // Get Services (Netflix, Spotify)
+            const resServices = await fetch('/api/services');
+            const services = await resServices.json();
+
+            const select = document.getElementById('serviceSelect');
+            select.innerHTML = services.map(s =>
+                `<option value="${s.id}" data-price="${s.defaultPrice}">${s.name}</option>`
+            ).join('');
+
+            // Auto-update price when service selected
+            select.addEventListener('change', (e) => {
+                const price = e.target.options[e.target.selectedIndex].dataset.price;
+                document.getElementById('amount').value = price;
+            });
+
+            // Get My Subscriptions
+            const resSubs = await fetch(`/api/subscriptions?userId=${user.id}`);
+            const subs = await resSubs.json();
+
+            const list = document.getElementById('sub-list');
+            list.innerHTML = subs.map(sub => `
+                <div class="sub-card">
+                    <div class="card-top">
+                        <div class="service-name">${sub.serviceType.name}</div>
+                    </div>
+                    <div class="service-cost">$${sub.amount}</div>
+                </div>
+            `).join('');
+        }
+
+        // 3. Add Sub
+        document.getElementById('sub-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const serviceId = document.getElementById('serviceSelect').value;
+            const amount = document.getElementById('amount').value;
+
+            await fetch('/api/subscriptions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    serviceId: serviceId,
+                    payerId: user.id,
+                    amount: amount
+                })
+            });
+            init(); // Refresh list
+        });
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
