@@ -1,4 +1,4 @@
-package com.subsync.backend;
+package com.subsync.backend; // <--- This must match the others
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,11 +10,9 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-// @ControllerAdvice tells Spring: "Catch errors from ALL Controllers here"
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 1. Handle "Resource Not Found" (e.g., Deleting a missing subscription)
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Object> handleRuntimeException(RuntimeException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
@@ -25,7 +23,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
-    // 2. Handle General Crashes (e.g., Database down)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGlobalException(Exception ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
