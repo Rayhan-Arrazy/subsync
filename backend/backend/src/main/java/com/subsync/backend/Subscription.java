@@ -3,64 +3,115 @@ package com.subsync.backend;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(name = "subscriptions")
 public class Subscription {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // This matches the INT AUTO_INCREMENT in MySQL
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "service_id")
-    private ServiceType serviceType; // Links to "Netflix"
+    @Column(name = "user_id")
+    private Long userId;
 
-    @ManyToOne
-    @JoinColumn(name = "payer_id")
-    private User payer; // Links to "Alice"
+    @Column(name = "service_id")
+    private Long serviceId;
 
-    private BigDecimal amount;
-    private LocalDate renewalDate;
+    // We map the SQL column "custom_name" to "serviceName" so your Frontend JSON
+    // works
+    @Column(name = "custom_name")
+    private String serviceName;
 
-    // Getters and Setters
-    public UUID getId() {
+    @Column(name = "monthly_cost")
+    private BigDecimal monthlyCost;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "next_renewal")
+    private LocalDate nextRenewalDate;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    // --- Constructors ---
+    public Subscription() {
+    }
+
+    public Subscription(Long userId, Long serviceId, String serviceName, BigDecimal monthlyCost, LocalDate startDate,
+            LocalDate nextRenewalDate) {
+        this.userId = userId;
+        this.serviceId = serviceId;
+        this.serviceName = serviceName;
+        this.monthlyCost = monthlyCost;
+        this.startDate = startDate;
+        this.nextRenewalDate = nextRenewalDate;
+        this.isActive = true;
+    }
+
+    // --- Getters and Setters ---
+    public Long getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public ServiceType getServiceType() {
-        return serviceType;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public User getPayer() {
-        return payer;
+    public Long getServiceId() {
+        return serviceId;
     }
 
-    public void setPayer(User payer) {
-        this.payer = payer;
+    public void setServiceId(Long serviceId) {
+        this.serviceId = serviceId;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
-    public LocalDate getRenewalDate() {
-        return renewalDate;
+    public BigDecimal getMonthlyCost() {
+        return monthlyCost;
     }
 
-    public void setRenewalDate(LocalDate renewalDate) {
-        this.renewalDate = renewalDate;
+    public void setMonthlyCost(BigDecimal monthlyCost) {
+        this.monthlyCost = monthlyCost;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getNextRenewalDate() {
+        return nextRenewalDate;
+    }
+
+    public void setNextRenewalDate(LocalDate nextRenewalDate) {
+        this.nextRenewalDate = nextRenewalDate;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 }
