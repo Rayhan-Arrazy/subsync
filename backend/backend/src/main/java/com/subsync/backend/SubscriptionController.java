@@ -1,114 +1,58 @@
 package com.subsync.backend;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/subscriptions")
+@CrossOrigin(origins = "*") // Allows your frontend to talk to this backend
 public class SubscriptionController {
 
-    private final UserRepository userRepo;
-    private final ServiceTypeRepository serviceRepo;
-    private final SubscriptionRepository subRepo;
+    @Autowired
+    private SubscriptionRepository repository;
 
-    // Inject the repositories
-    public SubscriptionController(UserRepository userRepo,
-            ServiceTypeRepository serviceRepo,
-            SubscriptionRepository subRepo) {
-        this.userRepo = userRepo;
-        this.serviceRepo = serviceRepo;
-        this.subRepo = subRepo;
+    // 1. GET ALL SUBSCRIPTIONS
+    @GetMapping
+    public List<Subscription> getAllSubscriptions() {
+        return repository.findAll();
     }
 
-    // --- 1. LOGIN ---
-    @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> payload) {
-        String username = payload.get("username");
-        String password = payload.get("password");
+    // 2. CREATE NEW SUBSCRIPTION
+    @PostMapping
+    public Subscription createSubscription(@RequestBody Subscription sub) {
+        // We need to fill in missing data because your simple Frontend form
+        // doesn't send UserID or ServiceID yet.
 
-        User user = userRepo.findByUsername(username);
-
-        if (user != null && user.getPassword().equals(password)) {
-            // Login Success
-            return Map.of(
-                    "id", user.getId(),
-                    "username", user.getUsername());
+        // AUTO-FIX: If userId is missing, assign it to User ID 1 (Rayhan)
+        if (sub.getUserId() == null) {
+            sub.setUserId(1L);
         }
-        throw new RuntimeException("Invalid Login");
+
+        // AUTO-FIX: If serviceId is missing, assign it to 'General' (ID 1)
+        if (sub.getServiceId() == null) {
+            sub.setServiceId(1L);
+        }
+
+        // AUTO-FIX: If dates are missing, set them to today
+        if (sub.getStartDate() == null) {
+            sub.setStartDate(LocalDate.now());
+        }
+        if (sub.getNextRenewalDate() == null) {
+            sub.setNextRenewalDate(LocalDate.now().plusMonths(1));
+        }
+
+        // Set Active by default
+        sub.setIsActive(true);
+
+        return repository.save(sub);
     }
 
-    // --- 2. GET SERVICES (For Dropdown) ---
-    @GetMapping("/services")
-    public List<ServiceType> getAllServices() {
-        return serviceRepo.findAll();
-    }
-
-    // --- 3. GET MY SUBSCRIPTIONS ---
-    @GetMapping("/subscriptions")
-    public List<Subscription> getMySubscriptions(@RequestParam UUID userId) {
-        return subRepo.findByPayerId(userId);
-    }
-
-    // --- 4. ADD NEW SUBSCRIPTION ---
-    @PostMapping("/subscriptions")
-    public Subscription addSubscription(@RequestBody Map<String, Object> payload) {
-        // 1. Find the User
-        UUID payerId = UUID.fromString((String) payload.get("payerId"));
-        User payer = userRepo.findById(payerId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // 2. Find the Service (Netflix/Spotify)
-        UUID serviceId = UUID.fromString((String) payload.get("serviceId"));
-        ServiceType service = serviceRepo.findById(serviceId)
-                .orElseThrow(() -> new RuntimeException("Service not found"));
-
-        // 3. Create Connection
-        Subscription sub = new Subscription();
-        sub.setPayer(payer);
-        sub.setServiceType(service);
-
-        // Handle Amount (Convert safely from JSON)
-        String amountStr = payload.get("amount").toString();
-        sub.setAmount(new java.math.BigDecimal(amountStr));
-
-        sub.setRenewalDate(java.time.LocalDate.now().plusMonths(1));
-
-        return subRepo.save(sub);
-    }
-
-    // --- 5. INITIALIZE DEMO DATA (Run once) ---
-    @GetMapping("/init")
-    public String initData() {
-        if (userRepo.count() > 0)
-            return "Data already exists!";
-
-        // Create Users
-        User alice = new User();
-        alice.setUsername("alice");
-        alice.setPassword("123");
-        userRepo.save(alice);
-
-        User bob = new User();
-        bob.setUsername("bob");
-        bob.setPassword("123");
-        userRepo.save(bob);
-
-        // Create Services
-        ServiceType netflix = new ServiceType();
-        netflix.setName("Netflix");
-        netflix.setDefaultPrice(new java.math.BigDecimal("15.99"));
-        serviceRepo.save(netflix);
-
-        ServiceType spotify = new ServiceType();
-        spotify.setName("Spotify");
-        spotify.setDefaultPrice(new java.math.BigDecimal("9.99"));
-        serviceRepo.save(spotify);
-
-        ServiceType aws = new ServiceType();
-        aws.setName("AWS");
-        aws.setDefaultPrice(new java.math.BigDecimal("29.99"));
-        serviceRepo.save(aws);
-
-        return "Database Initialized! Login as 'alice' with '123'";
+    // 3. DELETE SUBSCRIPTION
+    @DeleteMapping("/{id}")
+    public void deleteSubscription(@PathVariable Long id) {
+        repository.deleteById(id);
     }
 }
