@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SubSync | Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific tweaks for login centering */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+        }
+
+        .logo-large {
+            font-size: 2.5rem;
+            color: #6366f1;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-blur"></div>
+
+    <div class="add-sub-section login-card">
+        <div class="logo-large"><i class="fa-solid fa-layer-group"></i></div>
+        <h2 style="margin-top:0;">Welcome Back</h2>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="e.g. alice" required>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••" required>
+            </div>
+
+            <button type="submit">Sign In <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
+
+        <p style="margin-top:20px; font-size:0.8rem; color:#94a3b8; cursor:pointer;" onclick="seedData()">
+            <i class="fa-solid fa-database"></i> Click here to generate Demo Data
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+
+            // Simple login via API
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+
+            if (res.ok) {
+                const user = await res.json();
+                sessionStorage.setItem('user', JSON.stringify(user));
+                window.location.href = 'index.html'; // Go to main app
+            } else {
+                alert("Login Failed");
+            }
+        });
+
+        // Quick button to create data so you don't have to type SQL
+        async function seedData() {
+            await fetch('/api/init');
+            alert("Demo data created! Try logging in as 'alice' with password '123'");
+        }
+    </script>
+</body>
+
+</html>

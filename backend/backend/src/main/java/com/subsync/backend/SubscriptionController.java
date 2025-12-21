@@ -1,6 +1,7 @@
 package com.subsync.backend;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -8,35 +9,36 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/subscriptions")
-@CrossOrigin(origins = "*") // Allows your frontend to talk to this backend
+@CrossOrigin(origins = "*") // Allows the frontend to communicate with this backend
 public class SubscriptionController {
 
     @Autowired
     private SubscriptionRepository repository;
 
-    // 1. GET ALL SUBSCRIPTIONS
+    // 1. GET ALL SUBSCRIPTIONS (For the Dashboard List)
     @GetMapping
     public List<Subscription> getAllSubscriptions() {
         return repository.findAll();
     }
 
-    // 2. CREATE NEW SUBSCRIPTION
+    // 2. GET SINGLE SUBSCRIPTION (For the Detail Page)
+    @GetMapping("/{id}")
+    public ResponseEntity<Subscription> getSubscription(@PathVariable Long id) {
+        return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // 3. CREATE NEW SUBSCRIPTION (For the "Add" Form)
     @PostMapping
     public Subscription createSubscription(@RequestBody Subscription sub) {
-        // We need to fill in missing data because your simple Frontend form
-        // doesn't send UserID or ServiceID yet.
-
-        // AUTO-FIX: If userId is missing, assign it to User ID 1 (Rayhan)
+        // Auto-fill defaults if data is missing
         if (sub.getUserId() == null) {
-            sub.setUserId(1L);
+            sub.setUserId(1L); // Default to User 1
         }
-
-        // AUTO-FIX: If serviceId is missing, assign it to 'General' (ID 1)
         if (sub.getServiceId() == null) {
-            sub.setServiceId(1L);
+            sub.setServiceId(1L); // Default to 'General' service
         }
-
-        // AUTO-FIX: If dates are missing, set them to today
         if (sub.getStartDate() == null) {
             sub.setStartDate(LocalDate.now());
         }
@@ -44,13 +46,13 @@ public class SubscriptionController {
             sub.setNextRenewalDate(LocalDate.now().plusMonths(1));
         }
 
-        // Set Active by default
+        // Ensure it is marked as active
         sub.setIsActive(true);
 
         return repository.save(sub);
     }
 
-    // 3. DELETE SUBSCRIPTION
+    // 4. DELETE SUBSCRIPTION (For the Trash Button)
     @DeleteMapping("/{id}")
     public void deleteSubscription(@PathVariable Long id) {
         repository.deleteById(id);

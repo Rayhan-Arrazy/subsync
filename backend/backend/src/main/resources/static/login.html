@@ -3,56 +3,154 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>SubSync | Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SubSync - Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        /* Specific tweaks for login centering */
+        :root {
+            --bg-dark: #000000;
+            /* Pitch black */
+            --bg-card: #151515;
+            /* Dark gray card */
+            --accent-gradient: linear-gradient(135deg, #00C9A7 0%, #005F73 100%);
+            /* Teal gradient */
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --primary-color: #00C9A7;
+        }
+
         body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
+            margin: 0;
         }
 
         .login-card {
+            background-color: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: 24px;
             width: 100%;
-            max-width: 320px;
+            max-width: 350px;
             text-align: center;
+            border: 1px solid #222;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
-        .logo-large {
-            font-size: 2.5rem;
-            color: #6366f1;
-            margin-bottom: 20px;
+        .logo {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            background-color: #000;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--accent-gradient);
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        .demo-link {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-decoration: none;
+            border: 1px dashed #333;
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+
+        .demo-link:hover {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
         }
     </style>
 </head>
 
 <body>
-    <div class="background-blur"></div>
 
-    <div class="add-sub-section login-card">
-        <div class="logo-large"><i class="fa-solid fa-layer-group"></i></div>
-        <h2 style="margin-top:0;">Welcome Back</h2>
+    <div class="login-card">
+        <div class="logo">
+            <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Enter your details to sign in.</p>
 
         <form id="loginForm">
             <div class="input-group">
                 <label>Username</label>
                 <input type="text" id="username" placeholder="e.g. alice" required>
             </div>
-
             <div class="input-group">
                 <label>Password</label>
                 <input type="password" id="password" placeholder="••••••" required>
             </div>
-
-            <button type="submit">Sign In <i class="fa-solid fa-arrow-right"></i></button>
+            <button type="submit">Sign In</button>
         </form>
 
-        <p style="margin-top:20px; font-size:0.8rem; color:#94a3b8; cursor:pointer;" onclick="seedData()">
-            <i class="fa-solid fa-database"></i> Click here to generate Demo Data
-        </p>
+        <div class="demo-link" onclick="seedData()">
+            <i class="fa-solid fa-database"></i> Generate Demo User
+        </div>
+        <p id="msg" style="color: #00C9A7; font-size: 0.8rem; margin-top: 10px; display: none;"></p>
     </div>
 
     <script>
@@ -61,26 +159,41 @@
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
 
-            // Simple login via API
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: u, password: p })
-            });
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
 
-            if (res.ok) {
-                const user = await res.json();
-                sessionStorage.setItem('user', JSON.stringify(user));
-                window.location.href = 'index.html'; // Go to main app
-            } else {
-                alert("Login Failed");
+                if (res.ok) {
+                    const user = await res.json();
+                    sessionStorage.setItem('user', JSON.stringify(user));
+                    window.location.href = 'index.html';
+                } else {
+                    alert("Login Failed: Invalid credentials");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Server error. Is the backend running?");
             }
         });
 
-        // Quick button to create data so you don't have to type SQL
+        // Demo Data Generator
         async function seedData() {
-            await fetch('/api/init');
-            alert("Demo data created! Try logging in as 'alice' with password '123'");
+            try {
+                const res = await fetch('/api/init');
+                const text = await res.text();
+                const msg = document.getElementById('msg');
+                msg.style.display = 'block';
+                msg.innerText = text;
+
+                // Auto-fill form for convenience
+                document.getElementById('username').value = 'alice';
+                document.getElementById('password').value = '123';
+            } catch (err) {
+                console.error(err);
+            }
         }
     </script>
 </body>

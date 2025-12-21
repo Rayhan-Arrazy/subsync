@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SubSync - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script>
+        // Security Check
         const currentUser = JSON.parse(sessionStorage.getItem('user'));
         if (!currentUser) {
             window.location.href = 'login.html';
@@ -14,13 +17,13 @@
 
     <style>
         :root {
-            --bg-dark: #0f1020;
-            --bg-card: #1c1d30;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
+            --bg-dark: #000000;
+            --bg-card: #151515;
+            --accent-gradient: linear-gradient(135deg, #00C9A7 0%, #005F73 100%);
             --text-main: #ffffff;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
+            --text-muted: #888888;
+            --danger: #ff4d4d;
+            --success: #00E096;
         }
 
         * {
@@ -38,39 +41,20 @@
             flex-direction: column;
         }
 
-        /* --- Navbar --- */
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem 5%;
-            background-color: transparent;
         }
 
         .logo {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            color: var(--primary);
+            color: white;
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 20px;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-muted);
-            font-weight: 500;
-            transition: 0.3s;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: var(--text-main);
         }
 
         .user-profile {
@@ -81,40 +65,34 @@
 
         .logout-btn {
             background: none;
-            border: 1px solid var(--text-muted);
+            border: 1px solid #333;
             padding: 5px 10px;
-            border-radius: 8px;
+            border-radius: 20px;
             color: var(--text-muted);
             cursor: pointer;
+            font-size: 0.8rem;
         }
 
-        .logout-btn:hover {
-            color: var(--danger);
-            border-color: var(--danger);
-        }
-
-        /* --- Main Layout --- */
         .container {
             flex: 1;
             display: grid;
             grid-template-columns: 350px 1fr;
-            gap: 40px;
-            padding: 2rem 5%;
+            gap: 50px;
+            padding: 1rem 5% 3rem 5%;
         }
 
-        /* --- Left Column: Form --- */
+        /* Form Section */
         .add-card {
-            background-color: var(--bg-card);
+            background-color: #111;
             padding: 2rem;
-            border-radius: 20px;
+            border-radius: 24px;
             height: fit-content;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            position: sticky;
-            top: 20px;
+            border: 1px solid #222;
         }
 
         .add-card h3 {
             margin-bottom: 1.5rem;
+            font-weight: 600;
         }
 
         .form-group {
@@ -125,132 +103,208 @@
             display: block;
             margin-bottom: 0.5rem;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: 12px;
             border: 1px solid #333;
-            background-color: #0b0c15;
+            background-color: #000;
             color: white;
             font-size: 1rem;
         }
 
         .form-control:focus {
-            outline: 2px solid var(--primary);
-            border-color: transparent;
+            outline: none;
+            border-color: #00C9A7;
         }
 
         .btn-primary {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 10px;
-            background-color: var(--primary);
+            border-radius: 12px;
+            background: var(--accent-gradient);
             color: white;
             font-weight: bold;
             font-size: 1rem;
             cursor: pointer;
             transition: 0.3s;
+            margin-top: 10px;
         }
 
         .btn-primary:hover {
-            background-color: var(--primary-hover);
+            opacity: 0.9;
+            transform: scale(0.98);
         }
 
-        /* --- Right Column: Grid --- */
-        .subs-section h2 {
-            margin-bottom: 1.5rem;
-            font-size: 1.5rem;
+        /* Dashboard Section */
+        .stats-card {
+            background: var(--accent-gradient);
+            padding: 2.5rem;
+            border-radius: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 201, 167, 0.2);
         }
 
-        .subs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .sub-item {
-            background-color: var(--bg-card);
-            padding: 1.5rem;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .sub-item:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
-
-        .sub-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
+        .stats-card h4 {
+            font-weight: normal;
+            opacity: 0.9;
+            font-size: 0.9rem;
             margin-bottom: 10px;
         }
 
-        .service-name {
+        .stats-card h1 {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .stats-card .badge {
+            position: absolute;
+            top: 2.5rem;
+            right: 2.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .subs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* --- THIS FIXES THE HOVER ISSUE --- */
+        .sub-row {
+            background-color: var(--bg-card);
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            border: 1px solid #222;
+
+            /* Vital for User Experience: */
+            cursor: pointer;
+        }
+
+        .sub-row:hover {
+            transform: translateY(-3px) scale(1.01);
+            border-color: #444;
+            background-color: #1a1a1a;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .sub-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sub-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background-color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.2rem;
             font-weight: bold;
-        }
-
-        .sub-cost {
-            font-size: 1.5rem;
-            color: var(--primary);
-            font-weight: bold;
-            margin: 10px 0;
-        }
-
-        .sub-cost span {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            font-weight: normal;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .btn-sm {
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .btn-delete {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-        }
-
-        .btn-delete:hover {
-            background-color: var(--danger);
             color: white;
         }
 
-        /* --- Mobile --- */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
+        /* Icon Colors */
+        .icon-n {
+            background: #E50914;
+        }
 
-            .add-card {
-                position: static;
-                order: -1;
-            }
+        .icon-s {
+            background: #1DB954;
+        }
 
-            .nav-links {
-                display: none;
-            }
+        .icon-a {
+            background: #FF9900;
+        }
+
+        .icon-f {
+            background: #0ACF83;
+        }
+
+        .icon-d {
+            background: #EA4C89;
+        }
+
+        .sub-text h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .sub-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .sub-price {
+            text-align: right;
+        }
+
+        .sub-price h4 {
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+
+        .sub-price p {
+            font-size: 0.75rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--success);
+            border-radius: 50%;
+        }
+
+        .btn-remove {
+            background: none;
+            border: none;
+            color: #444;
+            cursor: pointer;
+            margin-left: 20px;
+            font-size: 1rem;
+            padding: 10px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .btn-remove:hover {
+            color: var(--danger);
+            background-color: rgba(255, 77, 77, 0.1);
         }
     </style>
 </head>
@@ -259,99 +313,122 @@
 
     <nav>
         <div class="logo">
-            SubSync
-        </div>
-        <div class="nav-links">
-            <a href="#" class="active">Dashboard</a>
-            <a href="#">Analytics</a>
-            <a href="#">Settings</a>
+            <i class="fa-solid fa-layer-group" style="color:#00C9A7;"></i> SubSync
         </div>
         <div class="user-profile">
-            <span id="displayUsername" style="margin-right:10px;">Hello, User</span>
-            <button onclick="logout()" class="logout-btn">⏻ Logout</button>
+            <span id="displayUsername" style="font-size: 0.9rem;">User</span>
+            <button onclick="logout()" class="logout-btn">Logout</button>
         </div>
     </nav>
 
     <div class="container">
         <div class="add-card">
-            <h3>+ New Subscription</h3>
+            <h3>Add Subscription</h3>
             <form id="subForm">
                 <div class="form-group">
                     <label>Service Name</label>
-                    <input type="text" id="serviceName" class="form-control" placeholder="e.g. Netflix" required>
+                    <input type="text" id="serviceName" class="form-control" placeholder="e.g. Figma" required>
                 </div>
                 <div class="form-group">
                     <label>Monthly Cost ($)</label>
                     <input type="number" id="monthlyCost" class="form-control" step="0.01" placeholder="0.00" required>
                 </div>
-                <button type="submit" class="btn-primary">Track Subscription</button>
+                <button type="submit" class="btn-primary">Add Now</button>
             </form>
         </div>
 
-        <div class="subs-section">
-            <h2>Active Subscriptions</h2>
-            <div id="subsGrid" class="subs-grid">
-                <p style="color: gray;">Loading subscriptions...</p>
+        <div class="dashboard-content">
+            <div class="stats-card">
+                <div class="badge">Monthly</div>
+                <h4>Total subscriptions</h4>
+                <h1 id="totalCostDisplay">$0.00</h1>
+            </div>
+
+            <div class="section-header">
+                <h2>Subscriptions</h2>
+            </div>
+
+            <div id="subsList" class="subs-list">
+                <p style="color: gray; text-align: center;">Loading...</p>
             </div>
         </div>
     </div>
 
     <script>
-        // Set User Name in Top Bar
+        // Set Username
         if (currentUser && currentUser.username) {
-            document.getElementById('displayUsername').innerText = "Hello, " + currentUser.username;
+            document.getElementById('displayUsername').innerText = currentUser.username;
         }
 
         const API_URL = '/api/subscriptions';
 
-        // 1. Fetch Subscriptions
         async function loadSubscriptions() {
             try {
                 const res = await fetch(API_URL);
                 if (!res.ok) throw new Error("Failed to fetch");
                 const data = await res.json();
 
-                const grid = document.getElementById('subsGrid');
-                grid.innerHTML = '';
+                const list = document.getElementById('subsList');
+                const totalDisplay = document.getElementById('totalCostDisplay');
+
+                list.innerHTML = '';
+                let totalCost = 0;
 
                 if (data.length === 0) {
-                    grid.innerHTML = '<p style="color: gray;">No subscriptions found. Add one!</p>';
+                    list.innerHTML = '<p style="color: #444; text-align: center; margin-top:20px;">No active subscriptions.</p>';
+                    totalDisplay.innerText = "$0.00";
                     return;
                 }
 
                 data.forEach(sub => {
-                    const card = document.createElement('div');
-                    card.className = 'sub-item';
-                    // We check both 'serviceName' (Java Entity) and 'name' (Database) just in case
-                    const displayName = sub.serviceName || sub.custom_name || "Unknown Service";
+                    totalCost += sub.monthlyCost;
+                    const name = sub.serviceName || sub.custom_name || "Unknown";
+                    const firstChar = name.charAt(0).toLowerCase();
+                    const dateObj = new Date(sub.nextRenewalDate);
+                    const day = dateObj.getDate();
 
-                    card.innerHTML = `
-                        <div>
-                            <div class="sub-header">
-                                <span class="service-name">${displayName}</span>
+                    const row = document.createElement('div');
+                    row.className = 'sub-row';
+
+                    // --- CLICK HANDLER (Navigates to Detail Page) ---
+                    row.onclick = function () {
+                        window.location.href = `subscription-detail.html?id=${sub.id}`;
+                    };
+
+                    row.innerHTML = `
+                        <div class="sub-info">
+                            <div class="sub-icon icon-${firstChar}">${name.charAt(0).toUpperCase()}</div>
+                            <div class="sub-text">
+                                <h4>${name}</h4>
+                                <p>Basic Plan • Bill date ${day}</p>
                             </div>
-                            <div class="sub-cost">$${sub.monthlyCost}<span>/mo</span></div>
-                            <small style="color:gray">Next bill: ${sub.nextRenewalDate || 'Unknown'}</small>
                         </div>
-                        <div class="actions">
-                            <button class="btn-sm btn-delete" onclick="deleteSub(${sub.id})">Remove</button>
+                        <div style="display:flex; align-items:center;">
+                            <div class="sub-price">
+                                <h4>$${sub.monthlyCost}</h4>
+                                <p><span class="dot"></span> Active</p>
+                            </div>
+                            <button class="btn-remove" onclick="deleteSub(${sub.id}); event.stopPropagation();">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
                         </div>
                     `;
-                    grid.appendChild(card);
+                    list.appendChild(row);
                 });
+
+                totalDisplay.innerText = "$" + totalCost.toFixed(2);
+
             } catch (err) {
                 console.error(err);
             }
         }
 
-        // 2. Add Subscription
         document.getElementById('subForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const newSub = {
                 serviceName: document.getElementById('serviceName').value,
                 monthlyCost: parseFloat(document.getElementById('monthlyCost').value),
-                userId: currentUser.id // Link the new sub to the logged-in user
+                userId: currentUser.id
             };
 
             try {
@@ -360,33 +437,24 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newSub)
                 });
-
                 if (res.ok) {
                     document.getElementById('subForm').reset();
-                    loadSubscriptions(); // Refresh list
-                } else {
-                    alert("Error saving subscription");
+                    loadSubscriptions();
                 }
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
         });
 
-        // 3. Delete Subscription
         async function deleteSub(id) {
-            if (!confirm("Stop tracking this subscription?")) return;
-
+            if (!confirm("Remove this subscription?")) return;
             await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
             loadSubscriptions();
         }
 
-        // 4. Logout Function
         function logout() {
             sessionStorage.removeItem('user');
             window.location.href = 'login.html';
         }
 
-        // Initial Load
         loadSubscriptions();
     </script>
 </body>
