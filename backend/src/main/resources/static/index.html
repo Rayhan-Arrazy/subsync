@@ -355,16 +355,16 @@
     </div>
 
     <script>
-        // Set Username
         if (currentUser && currentUser.username) {
             document.getElementById('displayUsername').innerText = currentUser.username;
         }
 
+        // view all subs dashboard
         const API_URL = '/api/subscriptions';
 
         async function loadSubscriptions() {
             try {
-                const res = await fetch(API_URL);
+                const res = await (API_URL);
                 if (!res.ok) throw new Error("Failed to fetch");
                 const data = await res.json();
 
@@ -423,6 +423,7 @@
             }
         }
 
+        // new subcription
         document.getElementById('subForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const newSub = {
@@ -432,7 +433,7 @@
             };
 
             try {
-                const res = await fetch(API_URL, {
+                const res = await fetch(API_URL,fetch {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newSub)
@@ -444,6 +445,7 @@
             } catch (err) { console.error(err); }
         });
 
+        // delete sub based on id request
         async function deleteSub(id) {
             if (!confirm("Remove this subscription?")) return;
             await fetch(`${API_URL}/${id}`, { method: 'DELETE' });

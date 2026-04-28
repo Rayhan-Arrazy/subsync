@@ -9,19 +9,19 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/subscriptions")
-@CrossOrigin(origins = "*") // Allows the frontend to communicate with this backend
+@CrossOrigin(origins = "*")
 public class SubscriptionController {
 
     @Autowired
     private SubscriptionRepository repository;
 
-    // 1. GET ALL SUBSCRIPTIONS (For the Dashboard List)
+    // 1. GET ALL SUBSCRIPTIONS
     @GetMapping
     public List<Subscription> getAllSubscriptions() {
         return repository.findAll();
     }
 
-    // 2. GET SINGLE SUBSCRIPTION (For the Detail Page)
+    // 2. GET SINGLE SUBSCRIPTION
     @GetMapping("/{id}")
     public ResponseEntity<Subscription> getSubscription(@PathVariable Long id) {
         return repository.findById(id)
@@ -29,15 +29,15 @@ public class SubscriptionController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. CREATE NEW SUBSCRIPTION (For the "Add" Form)
+    // 3. CREATE NEW SUBSCRIPTION
     @PostMapping
     public Subscription createSubscription(@RequestBody Subscription sub) {
-        // Auto-fill defaults if data is missing
+        // Auto-fill
         if (sub.getUserId() == null) {
-            sub.setUserId(1L); // Default to User 1
+            sub.setUserId(1L);
         }
         if (sub.getServiceId() == null) {
-            sub.setServiceId(1L); // Default to 'General' service
+            sub.setServiceId(1L);
         }
         if (sub.getStartDate() == null) {
             sub.setStartDate(LocalDate.now());
@@ -46,13 +46,13 @@ public class SubscriptionController {
             sub.setNextRenewalDate(LocalDate.now().plusMonths(1));
         }
 
-        // Ensure it is marked as active
+        // activesub
         sub.setIsActive(true);
 
         return repository.save(sub);
     }
 
-    // 4. DELETE SUBSCRIPTION (For the Trash Button)
+    // 4. DELETE SUBSCRIPTION
     @DeleteMapping("/{id}")
     public void deleteSubscription(@PathVariable Long id) {
         repository.deleteById(id);
