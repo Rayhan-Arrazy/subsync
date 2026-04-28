@@ -6,7 +6,7 @@ CREATE TABLE app_users (
     id VARCHAR(36) PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL
-) ENGINE=InnoDB;
+);
 
 CREATE TABLE subscriptions (
     id VARCHAR(36) PRIMARY KEY,
@@ -19,16 +19,16 @@ CREATE TABLE subscriptions (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_sub_payer FOREIGN KEY (payer_id) REFERENCES app_users(id)
-) ENGINE=InnoDB;
+);
 
 CREATE TABLE subscription_consumers (
     subscription_id VARCHAR(36),
     user_id VARCHAR(36),
-    split_ratio DOUBLE DEFAULT 1.0,
+    split_ratio DOUBLE PRECISION DEFAULT 1.0,
     PRIMARY KEY (subscription_id, user_id),
     CONSTRAINT fk_con_sub FOREIGN KEY (subscription_id) REFERENCES subscriptions(id),
     CONSTRAINT fk_con_user FOREIGN KEY (user_id) REFERENCES app_users(id)
-) ENGINE=InnoDB;
+);
 
 CREATE TABLE ledger (
     id VARCHAR(36) PRIMARY KEY,
@@ -39,7 +39,7 @@ CREATE TABLE ledger (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_led_debtor FOREIGN KEY (debtor_id) REFERENCES app_users(id),
     CONSTRAINT fk_led_creditor FOREIGN KEY (creditor_id) REFERENCES app_users(id)
-) ENGINE=InnoDB;
+);
 
 -- ==========================================
 -- 2. DUMMY DATA SEEDING
@@ -54,15 +54,15 @@ INSERT INTO app_users (id, email, full_name) VALUES
 -- B. SUBSCRIPTIONS
 -- Alice pays for Netflix ($15)
 INSERT INTO subscriptions (id, payer_id, name, amount, billing_cycle, next_renewal_date) VALUES
-('sub-001', '11111111-1111-1111-1111-111111111111', 'Netflix 4K', 15.00, 'MONTHLY', CURDATE() + INTERVAL 5 DAY);
+('sub-001', '11111111-1111-1111-1111-111111111111', 'Netflix 4K', 15.00, 'MONTHLY', CURRENT_DATE + INTERVAL '5 days');
 
 -- Alice pays for Spotify Family ($20)
 INSERT INTO subscriptions (id, payer_id, name, amount, billing_cycle, next_renewal_date) VALUES
-('sub-002', '11111111-1111-1111-1111-111111111111', 'Spotify Family', 20.00, 'MONTHLY', CURDATE() + INTERVAL 10 DAY);
+('sub-002', '11111111-1111-1111-1111-111111111111', 'Spotify Family', 20.00, 'MONTHLY', CURRENT_DATE + INTERVAL '10 days');
 
 -- Bob pays for AWS Server ($50)
 INSERT INTO subscriptions (id, payer_id, name, amount, billing_cycle, next_renewal_date) VALUES
-('sub-003', '22222222-2222-2222-2222-222222222222', 'AWS Hosting', 50.00, 'MONTHLY', CURDATE() + INTERVAL 1 DAY);
+('sub-003', '22222222-2222-2222-2222-222222222222', 'AWS Hosting', 50.00, 'MONTHLY', CURRENT_DATE + INTERVAL '1 day');
 
 -- C. CONSUMERS (Who uses what?)
 -- Everyone uses Netflix

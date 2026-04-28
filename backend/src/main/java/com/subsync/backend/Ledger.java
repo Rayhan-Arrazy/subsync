@@ -9,7 +9,7 @@ import java.util.UUID;
 public class Ledger {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;''
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "debtor_id")
