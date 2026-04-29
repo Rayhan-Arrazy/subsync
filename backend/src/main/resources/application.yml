@@ -1,20 +1,41 @@
+# spring:
+#   application:
+#     name: subsync
+
+#   datasource:
+#     url: jdbc:postgresql://neondb_owner:npg_1RZ9DrIYdblW@ep-empty-cell-am8oyqya-pooler.c-5.us-east-1.aws.neon.tech/subsync?sslmode=require&channel_binding=require
+#     username: neondb_owner
+#     password: npg_1RZ9DrIYdblW
+
+#   jpa:
+#     open-in-view: false
+#     hibernate:
+#       ddl-auto: update
+#     properties:
+#       hibernate:
+#         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+#   flyway:
+#     enabled: true
+#     baseline-on-migrate: true
+
+server:
+  port: 8081
+
 spring:
-  application:
-    name: subsync
-
   datasource:
-    url: jdbc:postgresql://localhost:5432/subsync
-    username: postgres
-    password: password # Adjust this to your local PostgreSQL password
-
+    url: jdbc:postgresql://ep-empty-cell-am8oyqya-pooler.c-5.us-east-1.aws.neon.tech/subsync?sslmode=require
+    username: neondb_owner
+    password: npg_1RZ9DrIYdblW
+    driver-class-name: org.postgresql.Driver
+  
   jpa:
-    open-in-view: false
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
 
   flyway:
-    enabled: true
-    baseline-on-migrate: true
+    enabled: false
