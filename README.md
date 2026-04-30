@@ -4,44 +4,55 @@
 
 **Track every subscription. Never get surprised by a charge again.**
 
-![Java](https://img.shields.io/badge/Java-17+-orange?style=flat-square&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java-21+-orange?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=flat-square&logo=springboot&logoColor=white)
-![Maven](https://img.shields.io/badge/Maven-build-C71A36?style=flat-square&logo=apachemaven&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
 
 </div>
 
 ---
 
-SubSync is a Spring Boot web application for managing recurring subscriptions. Add your services, track billing cycles, and keep everything in one clean dashboard — no more forgotten trials or unexpected charges at the end of the month.
+SubSync is a modern full-stack application for managing recurring subscriptions. Add your services, track billing cycles, and keep everything in one clean dashboard — no more forgotten trials or unexpected charges at the end of the month.
 
 ---
 
 ## Quick Start
 
-> **Requires:** Java 17+ · Maven 3.6+
+> **Requires:** Java 21+ · Node.js 20+ · Maven 3.6+
 
+### 1. Clone & Setup
 ```bash
 git clone https://github.com/Rayhan-Arrazy/subsync.git
-cd subsync/backend/backend
+cd subsync
 ```
 
-Open `src/main/resources/application.properties` and set your database:
+### 2. Backend (Spring Boot)
+Open `backend/src/main/resources/application.yml` and configure your PostgreSQL:
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/subsync_db
-spring.datasource.username=root
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://your-db-url
+    username: your-user
+    password: your-password
 ```
 
-Then run:
-
+Run the API:
 ```bash
+cd backend
 ./mvnw spring-boot:run
 ```
 
-Visit → `http://localhost:8080`
+### 3. Frontend (React + Shadcn)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Visit → `http://localhost:5173` (Frontend) & `http://localhost:8081` (API)
 
 ---
 
@@ -49,10 +60,9 @@ Visit → `http://localhost:8080`
 
 | | |
 |---|---|
-| Language | Java 17 |
-| Framework | Spring Boot |
-| Frontend | HTML · CSS · JavaScript |
-| Build | Maven |
+| Backend | Java 21 · Spring Boot · PostgreSQL |
+| Frontend | React 19 · Shadcn/UI · Tailwind v4 |
+| Tooling | Maven · Vite · Lucide Icons |
 
 ---
 
@@ -60,16 +70,16 @@ Visit → `http://localhost:8080`
 
 ```
 subsync/
-└── backend/backend/
-    └── src/main/
-        ├── java/          # Controllers, services, models
-        └── resources/     # application.properties, templates
+├── backend/               # Spring Boot Application
+│   └── src/main/java/     # API Controllers, Models, Repositories
+└── frontend/              # Vite + React Application
+    └── src/components/    # Shadcn components & Custom UI
 ```
 
 ---
 
 <div align="center">
 
-Made with Spring Boot · MIT License
+Made with React & Spring Boot · MIT License
 
 </div>
