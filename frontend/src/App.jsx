@@ -1,130 +1,191 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  ListOrdered, 
+  History, 
+  Bell, 
+  RefreshCw
+} from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import DashboardPage from './pages/DashboardPage';
+import SubscriptionsPage from './pages/SubscriptionsPage';
+import HistoryPage from './pages/HistoryPage';
+import { fetchSubscriptions, createSubscription, deleteSubscription, fetchAllHistory } from './api';
 
-const App = () => {
+export default function App() {
   const [subscriptions, setSubscriptions] = useState([]);
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
-    fetchSubscriptions();
+    document.documentElement.classList.add('dark');
   }, []);
 
-  const fetchSubscriptions = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8080/api/subscriptions');
-      if (!response.ok) {
-        throw new Error('Failed to fetch subscriptions');
-      }
-      const data = await response.json();
-      setSubscriptions(data);
-      setLoading(false);
+      const [subsData, historyData] = await Promise.all([
+        fetchSubscriptions(),
+        fetchAllHistory()
+      ]);
+      setSubscriptions(subsData);
+      setHistory(historyData);
     } catch (err) {
-      setError(err.message);
+      console.error('Failed to load data:', err);
+    } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const handleAdd = async (data) => {
+    const created = await createSubscription(data);
+    setSubscriptions((prev) => [...prev, created]);
+    loadData(); // Refresh to get history if any was created (though usually not on add)
   };
 
+  const handleDelete = async (id) => {
+    await deleteSubscription(id);
+    setSubscriptions((prev) => prev.filter((s) => s.id !== id));
+    setHistory((prev) => prev.filter((h) => h.subscription?.id !== id));
+  };
+
+  // Notification calculations
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const notifications = subscriptions.filter((s) => {
+    if (!s.nextRenewalDate) return false;
+    const renewal = new Date(s.nextRenewalDate + 'T00:00:00');
+    const diff = Math.ceil((renewal - today) / (1000 * 60 * 60 * 24));
+    return diff >= 0 && diff <= 3;
+  }).map(s => {
+    const renewal = new Date(s.nextRenewalDate + 'T00:00:00');
+    const diff = Math.ceil((renewal - today) / (1000 * 60 * 60 * 24));
+    return { ...s, diff };
+  });
+
+  const navLinks = [
+    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/subscriptions', label: 'Subscriptions', icon: ListOrdered },
+    { to: '/history', label: 'History', icon: History },
+  ];
+
+  if (loading && subscriptions.length === 0) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-2">
+          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Syncing SubSync...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-indigo-500/30">
-      {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <span className="text-xl font-bold">S</span>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              SubSync
-            </h1>
+    <div className="min-h-screen bg-background font-sans antialiased dark">
+      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md">
+        <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          <div className="flex items-center gap-8">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground group-hover:scale-105 transition-transform">
+                S
+              </div>
+              <span className="text-xl font-bold tracking-tight">SubSync</span>
+            </Link>
+
+            <nav className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
+                    location.pathname === link.to ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  <link.icon className="h-4 w-4" />
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </div>
-          <nav>
-            <button 
-              onClick={fetchSubscriptions}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors text-sm font-medium border border-slate-700"
-            >
-              Refresh Data
-            </button>
-          </nav>
+
+          <div className="flex items-center gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {notifications.length > 0 && (
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive" />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80">
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-sm font-semibold">Billing Reminders</h3>
+                  <div className="flex flex-col gap-1">
+                    {notifications.length === 0 ? (
+                      <p className="py-4 text-center text-xs text-muted-foreground">🎉 No upcoming bills!</p>
+                    ) : (
+                      notifications.map((n) => (
+                        <div key={n.id} className="flex items-center gap-3 rounded-md p-2 hover:bg-accent">
+                          <div className={`h-2 w-2 rounded-full ${n.diff === 0 ? "bg-destructive" : "bg-warning"}`} />
+                          <div className="flex-1 overflow-hidden">
+                            <p className="truncate text-xs font-medium">{n.serviceName}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {n.diff === 0 ? "Due today" : n.diff === 1 ? "Due tomorrow" : `Due in ${n.diff} days`}
+                            </p>
+                          </div>
+                          <span className="text-xs font-semibold">${parseFloat(n.monthlyCost).toFixed(2)}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            <Button variant="ghost" size="icon" onClick={loadData} title="Refresh data">
+              <RefreshCw className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        <div className="flex flex-col gap-8">
-          <div>
-            <h2 className="text-3xl font-bold mb-2">My Subscriptions</h2>
-            <p className="text-slate-400">Manage and track your active subscriptions.</p>
-          </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
-            </div>
-          ) : error ? (
-            <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-2xl text-red-400">
-              <p className="font-semibold">Error loading subscriptions</p>
-              <p className="text-sm opacity-80">{error}</p>
-              <button 
-                onClick={fetchSubscriptions}
-                className="mt-4 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 rounded-lg transition-colors text-sm"
-              >
-                Try Again
-              </button>
-            </div>
-          ) : subscriptions.length === 0 ? (
-            <div className="bg-slate-900/50 border border-slate-800 p-12 rounded-3xl text-center">
-              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                💸
-              </div>
-              <h3 className="text-xl font-semibold mb-2">No subscriptions found</h3>
-              <p className="text-slate-400 max-w-md mx-auto">
-                Your subscription list is empty. Start adding subscriptions to keep track of your spending.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {subscriptions.map((sub) => (
-                <div 
-                  key={sub.id} 
-                  className="group bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-indigo-500/50 transition-all hover:shadow-2xl hover:shadow-indigo-500/5"
-                >
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center text-xl group-hover:bg-indigo-600/20 transition-colors">
-                      {sub.serviceName?.charAt(0) || 'S'}
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${sub.isActive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
-                      {sub.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold mb-1">{sub.serviceName}</h3>
-                  <p className="text-slate-400 text-sm mb-4">{sub.planName || 'Standard Plan'}</p>
-                  
-                  <div className="flex justify-between items-end mt-auto">
-                    <div>
-                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Next Renewal</p>
-                      <p className="font-medium text-slate-300">{new Date(sub.nextRenewalDate).toLocaleDateString()}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Price</p>
-                      <p className="text-2xl font-bold text-indigo-400">${sub.monthlyCost?.toFixed(2) || '0.00'}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <main className="container mx-auto max-w-7xl px-6 py-8">
+        <Routes>
+          <Route
+            path="/"
+            element={<DashboardPage subscriptions={subscriptions} history={history} onDelete={handleDelete} />}
+          />
+          <Route
+            path="/subscriptions"
+            element={
+              <SubscriptionsPage
+                subscriptions={subscriptions}
+                onAdd={handleAdd}
+                onDelete={handleDelete}
+              />
+            }
+          />
+          <Route
+            path="/history"
+            element={<HistoryPage history={history} />}
+          />
+        </Routes>
       </main>
 
-      {/* Footer */}
-      <footer className="max-w-6xl mx-auto px-6 py-12 border-t border-slate-900 mt-20">
-        <p className="text-slate-500 text-sm text-center">
-          &copy; {new Date().getFullYear()} SubSync. Built with React and Tailwind CSS.
-        </p>
+      <footer className="border-t py-12">
+        <div className="container mx-auto max-w-7xl px-6 text-center text-sm text-muted-foreground">
+          <p>© {new Date().getFullYear()} SubSync. Powered by Shadcn & Spring Boot.</p>
+        </div>
       </footer>
     </div>
   );
-};
-
-export default App;
+}
