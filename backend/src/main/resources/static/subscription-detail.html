@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SubSync - Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        // Security Check
+        const currentUser = JSON.parse(sessionStorage.getItem('user'));
+        if (!currentUser) window.location.href = 'login.html';
+    </script>
+
+    <style>
+        :root {
+            --bg-dark: #000000;
+            --bg-card: #151515;
+            --accent-gradient: linear-gradient(135deg, #00C9A7 0%, #005F73 100%);
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --danger: #ff4d4d;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .mobile-container {
+            width: 100%;
+            max-width: 400px;
+            /* Limits width to look like a mobile app */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            background: #222;
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #333;
+        }
+
+        .header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* --- Main Info Card --- */
+        .info-card {
+            background: var(--accent-gradient);
+            padding: 2rem;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 201, 167, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            margin: 0 auto 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+        }
+
+        .price-tag {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .price-tag span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            opacity: 0.8;
+        }
+
+        /* Info Grid inside Card */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 20px;
+        }
+
+        .grid-item h5 {
+            margin: 0;
+            opacity: 0.7;
+            font-weight: normal;
+            font-size: 0.8rem;
+        }
+
+        .grid-item p {
+            margin: 5px 0 0 0;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        /* --- Payment Method Section --- */
+        .section-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        .payment-row {
+            background-color: var(--bg-card);
+            padding: 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #222;
+        }
+
+        .card-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .mastercard-icon {
+            color: #eb001b;
+            font-size: 1.5rem;
+        }
+
+        .change-btn {
+            color: #00C9A7;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* --- Buttons --- */
+        .btn-cancel {
+            background-color: rgba(255, 77, 77, 0.1);
+            color: var(--danger);
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: auto;
+        }
+
+        .btn-cancel:hover {
+            background-color: rgba(255, 77, 77, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mobile-container">
+
+        <div class="header">
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <h2 id="headerTitle">Subscription</h2>
+        </div>
+
+        <div class="info-card">
+            <div class="service-logo" id="logoPlace">S</div>
+            <h2 id="serviceTitle">Loading...</h2>
+            <div class="price-tag" id="priceTag">$0.00<span>/mo</span></div>
+
+            <div class="info-grid">
+                <div class="grid-item">
+                    <h5>Payment date</h5>
+                    <p id="renewalDate">-</p>
+                </div>
+                <div class="grid-item text-right">
+                    <h5>Amount</h5>
+                    <p id="amountGrid">$0.00</p>
+                </div>
+                <div class="grid-item">
+                    <h5>Cycle</h5>
+                    <p>Monthly</p>
+                </div>
+                <div class="grid-item text-right">
+                    <h5>Type</h5>
+                    <p>Pro Plan</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Payment method</div>
+        <div class="payment-row">
+            <div class="card-info">
+                <i class="fa-brands fa-cc-mastercard mastercard-icon"></i>
+                <span>•••• 3432</span>
+            </div>
+            <button class="change-btn">Change</button>
+        </div>
+
+        <button class="btn-cancel" onclick="deleteSub()">Cancel subscription</button>
+    </div>
+
+    <script>
+        // 1. Get ID from URL (e.g., subscription-detail.html?id=5)
+        const params = new URLSearchParams(window.location.search);
+        const subId = params.get('id');
+
+        const API_URL = '/api/subscriptions';
+
+        // 2. Load Data based oh each sub id
+        async function loadDetails() {
+            if (!subId) return;
+
+            try {
+                const res = await fetch(`${API_URL}/${subId}`);
+                if (!res.ok) throw new Error("Not Found");
+                const sub = await res.json();
+
+                // Populate Data
+                const name = sub.serviceName || sub.custom_name || "Service";
+                document.getElementById('headerTitle').innerText = name;
+                document.getElementById('serviceTitle').innerText = name;
+                document.getElementById('priceTag').innerHTML = `$${sub.monthlyCost}<span>/month</span>`;
+                document.getElementById('amountGrid').innerText = `$${sub.monthlyCost}`;
+                document.getElementById('renewalDate').innerText = sub.nextRenewalDate || "N/A";
+
+                // Logo Letter
+                document.getElementById('logoPlace').innerText = name.charAt(0).toUpperCase();
+
+            } catch (err) {
+                alert("Error loading subscription details");
+                console.error(err);
+            }
+        }
+
+        // 3. Delete Function
+        async function deleteSub() {
+            if (!confirm("Are you sure you want to cancel this subscription?")) return;
+
+            try {
+                await fetch(`${API_URL}/${subId}`, { method: 'DELETE' });
+                alert("Subscription cancelled.");
+                window.location.href = 'index.html'; // Go back home
+            } catch (err) {
+                console.error(err);
+                alert("Error deleting");
+            }
+        }
+
+        loadDetails();
+    </script>
+</body>
+
+</html>
